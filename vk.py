@@ -2,13 +2,12 @@ import requests
 import datetime
 import json
 import time
+import sys
 from tqdm import tqdm
+
 
 with open('token.txt', 'r') as file_object:
     token = file_object.read().strip()
-
-with open('token_ya.txt', 'r') as file_object:
-    token_ya = file_object.read().strip()
 
 
 class Vk:
@@ -17,17 +16,31 @@ class Vk:
 
     def __init__(self, token):
         self.params = {'access_token': token, 'v': '5.131'}
-    # user_id 148916467
+
+    def get_user(self):
+        user_id_ = input("Введите user id или username: ")
+        user_url = self.url + 'users.get'
+        user_params = {'user_ids': user_id_}
+        user = requests.get(user_url, params={**self.params, **user_params}).json()
+        if user.get('error') == None:
+            if len(user['response']) != 0:
+                user_id = user['response'][0]['id']
+            else:
+                print('Такого id или username не существует')
+                sys.exit()
+        else:
+            print('Не корректный ввод')
+            sys.exit()
+        return user_id
 
     def get_photos(self):
-        user_id = input("Введите user_id: ")
+        user_id = self.get_user()
         count = input("Введите количество фотографий для копирования: ")
         get_photo_url = self.url + 'photos.get'
         get_photo_params = {'user_id': user_id, 'extended': '1',
                             'album_id': 'profile', 'count': count, 'photo_sizes': '1'}
         req = requests.get(get_photo_url, params={**self.params, **get_photo_params}).json()
         return req['response']['items']
-
 
     def get_name_file(self):
         l_photos = []
@@ -49,7 +62,6 @@ class Vk:
 
             with open('photos.json', 'w') as f:
                 json.dump(list_photos, f, indent=2, ensure_ascii=False)
-        print(l_photos)
         return l_photos
 
 

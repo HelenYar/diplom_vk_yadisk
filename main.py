@@ -7,3 +7,4 @@ with open('token_ya.txt', 'r') as file_object:
 if __name__ == '__main__':
     ya = YandexDisk(token_ya)
     ya.upload_yad(token_ya)
+
